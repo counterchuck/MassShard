@@ -1,0 +1,461 @@
+
+
+
+
+
+
+
+
+
+
+    
+    
+        
+    
+
+
+
+
+
+    
+        
+    
+    
+    
+
+
+<html>
+    <head>
+        <link href="/styles.css.jsp" rel="stylesheet" type="text/css"/>
+        <link href="/_themes/global/styles.css.jsp" rel="stylesheet" type="text/css"/>
+
+        <script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery-1.8.3.min.js"></script>
+        <script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/tooltips.js"></script>
+        <script type="text/javascript" src="/js/viewer.js.jsp"></script>
+        <script type="text/javascript" src="/js/manage.js.jsp"></script>
+
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $("#cardDetail .tooltip .tooltiptext").tipTip();
+                
+                $(".pager").click(function(e) {
+                    if ($(this).hasClass('pager-disabled')) {
+                        e.preventDefault();
+                        return;
+                    }
+
+                    $("#forge-action").hide();
+                    $("#forge-result").hide();
+                    $("#forge-loading").show();
+                });
+
+                $("#forge-link").click(function(e) {
+                    actionHandler(e, $(this), 0);
+                });
+
+                $("#sacrifice-link").click(function(e) {
+                    actionHandler(e, $(this), 1);
+                });
+
+                $("#confirm-link").click(function(e) {
+                    e.preventDefault();
+                    doForge();
+                });
+
+                $("#result-okay-forge").click(function(e) {
+                    if (currentType !== 'c') {
+                        e.preventDefault();
+                        $("#forge-result").hide();
+                        $("#forge-result").children("div").hide();
+                        $("#forge-action").show();
+                    }
+                });
+
+                $("#cancel-link").click(function(e) {
+                    e.preventDefault();
+                    $("#forge-confirm").hide();
+                    $("#forge-action").show();
+                });
+
+                function actionHandler(e, object, action) {
+                    e.preventDefault();
+
+                    if (object.hasClass('forge-disabled')) {
+                        return;
+                    }
+
+                    currentAction = action;
+                    currentId = object.attr("data-id");
+
+                    showConfirm();
+                }
+
+                //$(".tooltip .tooltiptext").tipTip();
+            });
+
+            function closeWindow() {
+                self.parent.closeForge();
+            }
+
+            var currentAction, currentId, currentType = 'e';
+            var currentCost = 8, currentValue = 4;
+            var currentToken = 'fe9a2b03-a2de-4c5a-845b-9046d4618d7b';
+
+            function showConfirm() {
+                //doForge(id, action);
+                $("#forge-action").hide();
+                $("#forge-confirm").show();
+            }
+
+            function updateCount() {
+                var countElement = $("#rune-count");
+                var count = parseInt(countElement.text());
+
+                if (currentAction == 1) {
+                    count = count - 1;
+                } else {
+                    count = count + 1;
+                }
+
+                countElement.text(count);
+
+                if (count > 0) {
+                    $("#sacrifice-link").removeClass("forge-disabled").removeClass("fancy-btn-disabled").addClass("fancy-btn");
+                } else {
+                    $("#sacrifice-link").addClass("forge-disabled").addClass("fancy-btn-disabled").removeClass("fancy-btn");
+                }
+
+                var posElement = $("#rune-position");
+                if (posElement != undefined) {
+                    var position = parseInt(posElement.text());
+
+                    if (position > count) {
+                        posElement.text(count);
+                    }
+                }
+
+                if (position > 1) {
+                    $("#prev-link").removeClass("pager-disabled");
+                } else {
+                    $("#prev-link").addClass("pager-disabled");
+                }
+
+                if (position <= (count - 1)) {
+                    $("#next-link").removeClass("pager-disabled");
+                } else {
+                    $("#next-link").addClass("pager-disabled");
+                }
+            }
+
+            function updateBalance(balance) {
+                $("#balance").text(balance);
+
+                if (balance < currentCost) {
+                    $("#forge-link").addClass("forge-disabled").addClass("fancy-btn-disabled").removeClass("fancy-btn");
+                } else {
+                    $("#forge-link").removeClass("forge-disabled").removeClass("fancy-btn-disabled").addClass("fancy-btn");
+                }
+            }
+
+            function doForge() {
+                if (currentId == undefined || currentAction == undefined) {
+                    return;
+                }
+
+                $("#forge-confirm").hide();
+                $("#forge-working").show();
+
+                setTimeout(function() {
+                    $.ajax({
+                        url: "/runes/do-forge.do?i=" + currentId + "&t=e&k=" + currentToken + "&a=" + currentAction,
+                        type: "GET",
+                        cache: false,
+                        async: true,
+                        dataType: "json",
+                        success: function(json) {
+                            $("#forge-working").hide();
+                            if (json.status == 1) {
+                                if (currentAction == 1) {
+                                    $("#sacrifice-result-success").show();
+                                } else {
+                                    $("#forge-result-success").show();
+                                }
+
+                                updateBalance(json.balance);
+                                updateCount();
+
+                                currentToken = json.token;
+                            } else {
+                                if (currentAction == 1) {
+                                    if (json.status == -2) {
+                                        $("#sacrifice-error-message").text("All of the instances of the specified rune are currently assigned to a deck. Please remove at least one to continue.");
+                                    } else {
+                                        $("#sacrifice-error-message").text("A problem was encountered while sacrificing the rune. Please try again later.");
+                                    }
+									$("#result-okay-forge span").text("Okay");
+                                    $("#sacrifice-result-failed").show();
+                                } else {
+                                    if (json.status == -3) {
+                                        $("#forge-error-message").text("You have exceeded the maximum number of Exotic and Legendary runes that you can forge this week.");
+										$("#forge-result-failed2").show();
+									} else {
+										$("#forge-result-failed").show();
+									}
+									$("#result-okay-forge span").text("Okay");
+                                }
+                            }
+
+                            $("#forge-result").show();
+                        },
+                        error: function(xhr, status, error) {
+                            if (currentAction == 1) {
+                                $("#sacrifice-result-failed").show();
+                            } else {
+                                $("#forge-result-failed").show();
+                            }
+                        }
+                    });
+                }, 1000);
+            }
+        </script>
+
+        <style>
+            body {
+                background: #000000 url('https://d2aao99y1mip6n.cloudfront.net/images/forge/forge_deco_background.png') no-repeat bottom center;
+            }
+
+            .nora-label {
+                color: #ababab;
+                font-size: 14px;
+            }
+
+            .nora-value {
+                color: #ffffff;
+                font-size: 14px;
+                line-height: 14px;
+            }
+
+            a.pager {
+                color: #5BB3D8;
+                z-index: 9999;
+                position: relative;
+                text-decoration: none;
+                font: 12pt Georgia, "Times New Roman", Times, serif;
+            }
+
+            a.pager-disabled {
+                color: #ababab;
+                cursor: text;
+            }
+
+            span.pager-disabled {
+                color: #ababab;
+            }
+
+            .result {
+                text-align: center;
+                display: none;
+                padding: 7px;
+                margin: 0 10px;
+            }
+
+            .result h1 {
+                padding-top: 0;
+                font-size: 16px;
+            }
+
+            #forge-confirm {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <a href="javascript:void(0);" onclick="closeWindow(); return false;" style="position: absolute; top: 0px; right: 0px;"><img src="/_themes/global/btn_closewindow.gif" border="0"/></a>
+        
+        
+            
+            
+            
+                <div style="text-align: center; margin-top: 7px; height: 20px;"><span id="rune-count">3</span></div>
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+        
+        
+        
+        
+    
+    
+
+
+
+
+
+    
+    
+        
+    
+
+
+<div class="rune-container">
+    <div class="rune-preview" style="margin-top: -5px;">
+        <div class="rune-front">
+            <img class="rune-front-frame" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/front/5.gif"/>
+            <img class="rune-front-image" src="https://d2aao99y1mip6n.cloudfront.net/images/runes/lg/ej9Fj9Eg3AE8Df1BE8Dj9Dj9Eerqwinwvmeeiwqf.jpg"/>
+            <img class="rune-front-rarity" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/lg_frame_rarity_uncom.gif"/>
+            <div class="rune-front-faction">
+                <img class="rune-faction-icon-1" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/faction_5_1.png"/>
+                <img class="rune-faction-icon-2" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/faction_5_2.png"/>
+            </div>
+            <span class="rune-front-name shadow">Oaken Mace</span>
+            <div class="rune-front-cost tooltip">
+                <span class="rune-cost shadow">35</span>
+                <span class="tooltiptext">Nora Cost</span>
+            </div>
+            <div class="rune-artist">Illustrated By: <span class="rune-artist-name">Bryan Rypkowski</span></div>
+        </div>
+        <div class="rune-back" style="background: transparent url('https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/back/5.gif') no-repeat right top;">
+            <div class="rune-back-faction">
+                <img class="rune-faction-icon-1" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/faction_5_1.png"/>
+                <img class="rune-faction-icon-2" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/frames/large/faction_5_2.png"/>
+            </div>
+            <span class="rune-back-name shadow">Equipment</span>
+            <div class="rune-back-flavor">"Menalaus does not realize that this IS the forest defending itself" - Godwin, Elder Garu</div>
+            <div class="rune-back-description-container">
+                
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div class="rune-back-description">Equipped champion has <strong class="ability-keyword">Oaken Mace</strong>.</div>
+<div class="ability-info-hover" data-id="8" data-hover-id="rune-hover-8" data-x-offset="0" data-y-offset="-50" style="z-index: 90000;"></div>
+<div id="rune-hover-8" style="position: absolute; width: 200px; display: none; z-index: 89999;">
+    
+        <div class="ability-mechanics" style="margin-left: 0;">
+            
+                
+                    <div class="ability-info ability-mechanic">
+                        <span class="ability-mechanic-header">Oaken Mace</span>
+                        <span class="ability-mechanic-description">This champion makes a Physical attack at RNG 1 with +2 DMG. If the target is a champion and successfully damaged, it becomes <strong class="condition-keyword">Stunned</strong> for 2 turns.</span>
+                    </div>
+                
+            
+        </div>
+    
+</div>
+            </div>
+            <div class="rune-back-attributes">
+                <div>Deck Limit: <span class="rune-back-attribute-value">2</span></div>
+            </div>
+            <div class="rune-set">Expansion: <span class="rune-set-name">Pox Nora Release Set</span></div>
+        </div>
+    </div>
+    
+    
+</div>
+            
+            
+        
+
+        <div style="height: 110px; position: relative; margin-top: 5px;">
+            <div id="forge-loading" style="display: none;">
+                <img src="https://d2aao99y1mip6n.cloudfront.net/images/trader-loader.gif" style="padding-top: 40px; margin: 0 auto; display: block;"/>
+            </div>
+            
+            
+                
+                
+                    <div id="forge-action">
+                        <div style="position: absolute; width: 70px; top: 35px; left: 20px; text-align: center;">
+                            <span class="nora-label">Worth:</span>
+                            <div>
+                                <img src="https://d2aao99y1mip6n.cloudfront.net/images/forge/nora_shard_icon.png" style="width: 19px; height: 17px; vertical-align: middle;"/> <span class="nora-value">4</span>
+                            </div>
+                        </div>
+                        
+                        
+                        
+                            
+                            
+                                
+                            
+                        
+                        <a class="fancy-red-btn" data-id="8" id="sacrifice-link" href="#" style="position: absolute; top: 20px; left: 110px;"><span>Sacrifice</span></a>
+                        <div style="position: absolute; width: 130px; top: 35px; left: 280px; text-align: center;">
+                            <span class="nora-label">Your Nora Shards:</span>
+                            <div>
+                                <img src="https://d2aao99y1mip6n.cloudfront.net/images/forge/nora_shard_icon.png" style="width: 19px; height: 17px; vertical-align: middle;"/> <span class="nora-value" id="balance">892</span>
+                            </div>
+                        </div>
+                        
+                        
+                        <a class="fancy-btn" data-id="8" id="forge-link" href="#" style="position: absolute; top: 20px; left: 430px;"><span>Forge</span></a>
+                        <div style="position: absolute; width: 70px; top: 35px; left: 600px; text-align: center;">
+                            <span class="nora-label">Cost:</span>
+                            <div>
+                                <img src="https://d2aao99y1mip6n.cloudfront.net/images/forge/nora_shard_icon.png" style="width: 19px; height: 17px; vertical-align: middle;"/> <span class="nora-value">8</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="forge-working" style="display: none;">
+                        <img src="https://d2aao99y1mip6n.cloudfront.net/images/forge/forging.gif" style="margin: 0 auto; display: block;"/>
+                    </div>
+
+                    <div id="forge-confirm" style="display: none;">
+                        <a class="fancy-btn" id="cancel-link" href="#" style="position: absolute; top: 20px; left: 170px;"><span>Cancel</span></a>
+                        <a class="fancy-btn" id="confirm-link" href="#" style="position: absolute; top: 20px; left: 370px;"><span>Confirm</span></a>
+                    </div>
+
+                    <div id="forge-result" style="display: none;">
+                        <div id="forge-result-success" class="result">
+                            <h1>The rune has been successfully forged and added to your collection! You can use the Rune Manager to add it to a battlegroup.</h1>
+                        </div>
+
+                        <div id="forge-result-failed" class="result">
+                            <h1>An unknown problem was encountered while attempting to forge the rune specified. Please wait a few minutes and try again or contact technical support.</h1>
+                        </div>
+
+                        <div id="sacrifice-result-success" class="result">
+                            <h1>The rune has been successfully sacrificed and the nora shards have been added to your account!</h1>
+                        </div>
+
+                        <div id="sacrifice-result-failed" class="result">
+                            <h1 id="sacrifice-error-message"></h1>
+                        </div>
+						
+						<div id="forge-result-failed2" class="result">
+                            <h1 style="color:red" id="forge-error-message"></h1>
+                        </div>
+
+                        <a href="/runes/start-forge.do?m=forge&i=8&t=e" id="result-okay-forge" class="fancy-btn-med" style="margin: 5px auto 0 auto; display: block;"><span>Great!</span></a>
+						
+                    </div>
+                
+            
+        </div>
+    </body>
+</html>

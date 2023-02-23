@@ -1,0 +1,1520 @@
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+
+
+	
+
+
+
+
+<!doctype html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:fb="http://www.facebook.com/2008/fbml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- pox-monitor -->
+<link rel="SHORTCUT ICON" href="https://d2aao99y1mip6n.cloudfront.net/images/Pox_icon_2011.png">
+
+	
+	
+		<title>Pox Nora - Welcome to Pox Nora </title>
+	
+
+
+
+
+
+<link href="/styles.css.jsp" rel="stylesheet" type="text/css" />
+
+	
+		<link href="/_themes/kthir_forest/styles.css.jsp"
+			rel="stylesheet" type="text/css" />
+	
+
+
+<link href="/_themes/global/styles.css.jsp"	rel="stylesheet" type="text/css" />
+<link href="https://d2aao99y1mip6n.cloudfront.net/_themes/global/thickbox.css"	rel="stylesheet" type="text/css" />
+<link href="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery.jscrollpane.css" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+
+
+
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery-1.8.3.min.js"></script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery-ui-min.js"></script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery.mousewheel.js"></script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery.jscrollpane.min.js"></script>
+ 		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/thickbox-min.js"></script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/easyslider.js"></script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/jquery.bt.min.js"></script>
+		<script>var imagePath = "https://d2aao99y1mip6n.cloudfront.net/images/tooltiparrow.gif";</script>
+		<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/javascript/tooltips.js"></script>
+		<script type="text/javascript" src="/general.js.jsp"></script>
+
+		<script>
+
+			//rune manager functions
+
+			var currCollection;
+			var detailsLoading = false;
+			var fbSessionKey;
+			var fbUserId;
+			var fbcConnect;
+
+			function loadCollection(category,battlegroup,initial,pager){
+				currCollection = category;
+				var last24 = 0;
+				var recentParam = gup( 'recent' );
+				if(recentParam!=""){
+					last24 = "&last24=1";
+				}
+				if(initial){
+					if(last24 != 0){
+						$("#bgCollection").load('/runes/manager.do?a='+category+'&editing=1'+last24+ '&ignoreMe=' + new Date().getTime(), null, function(){toggleRMTabs(category);});
+					}else{
+						$("#bgCollection").load('/runes/manager.do?a='+category+'&editing=1'+ '&ignoreMe=' + new Date().getTime(), null, function(){toggleRMTabs(category);});
+					}
+				}
+				else if(pager){
+					$("#bgCollection").load('/runes/manager.do'+pager, null, function(){toggleRMTabs(category);});
+				}
+				else {
+					if(last24 != 0){
+						$("#bgCollection").load('/runes/manager.do?a='+category+'&s='+ battlegroup+last24+ '&ignoreMe=' + new Date().getTime(), null, function(){toggleRMTabs(category);});
+					}else{
+						$("#bgCollection").load('/runes/manager.do?a='+category+'&s='+ battlegroup+ '&ignoreMe=' + new Date().getTime(), null, function(){toggleRMTabs(category);});
+					}
+				}
+			}
+
+			function loadDetails(type,runeid){
+				if(detailsLoading == false){
+					detailsLoading = true;
+					$("#bgDetails").html("");
+					$("#TB_ajaxContent").html("");
+					$("#bgDetails").load('/runes/select.do?t=' + type + '&r=' + runeid+ '&ignoreMe=' + new Date().getTime());
+				}
+			}
+
+			function loadProductDetails(sku, costOverride)
+			{
+				detailsLoading = true;
+				$("#runeDetails").html("");
+				$("#TB_ajaxContent").html("");
+				$("#runeDetails").load('/preview/productPreviewAjax.do?sku=' + sku + '&costOverride='+costOverride);
+			}		
+						
+			
+			function loadError(error)
+			{
+				error = error.replace(/^\s+|\s+$/g,"");//.replace(/<.*?>/g, '');
+				
+				//var s = error.indexOf("Support.")+8;
+				//error = encodeURI(jQuery.trim(error.substr(s,error.length)));
+				//alert(error);
+				error = encodeURI(error);
+				
+				detailsLoading = true;
+				$("#runeDetails").html("");
+				$("#TB_ajaxContent").html("");
+				$("#runeDetails").load('/preview/productPreviewError.do?error='+error+'');
+			}					
+			
+			function loadBaseDetails(type,runeid){
+					detailsLoading = true;
+					$("#runeDetails").html("");
+					$("#TB_ajaxContent").html("");
+					$("#runeDetails").load('/preview/frontPreviewAjax.do?t=' + type + '&i=' + runeid);
+			}
+			
+			function fb_loggedin(){
+					
+			}
+			
+			function fb_loggedout(){
+			
+					
+			}
+			
+			function facebook_onlogin(){
+			
+				FB.Facebook.get_sessionState().waitUntilReady(function(){
+					var session = FB.getSession();
+					$("#TB_window").remove();
+					tb_show("Facebook Connect","/security/redirect.do?fbc=1&TB_iframe=true&height=500&width=750&fb_sig_user=&fb_sig_user=" + session.uid +"&fb_sig_session_key=" + session.session_key);
+					fb_loggedin();
+				});
+			}
+			
+			function loadDeck(step){
+				//$("#currentBGdeck").load('/runes/manager.do?a=0&fb=&init='+ step+ '&ignoreMe=' + new Date().getTime());
+			}
+			
+			function loadRealms(){
+				$("#realmList").load('/realms/listselect.do');
+				$("#realmList2").load('/realms/listselect.do');
+			}
+			
+			function toggleRMTabs(tabId){
+
+				hideRMTabs();
+
+				switch (tabId){
+				case 1:
+					$("#champions_tab").show();
+					break;
+				case 2:
+					$("#spells_tab").show();
+					break;
+				case 3:
+					$("#equipment_tab").show();
+					break;
+				case 4:
+					$("#relics_tab").show();
+					break;
+				case 8:
+					$("#avatars_tab").show();
+					break;
+				}
+			}
+
+			function hideRMTabs(){
+				$("#collectionLoader").hide();
+				$("#spells_tab").hide();
+				$("#champions_tab").hide();
+				$("#relics_tab").hide();
+				$("#equipment_tab").hide();
+				$("#avatars_tab").hide();
+			}
+
+			function switchBG(battlegroup,c){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+c+'&s='+battlegroup+isfb;
+			}
+
+			function switchFaction(faction,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&f='+faction+isfb+alpha;
+			}
+			function switchLevel(level,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&l='+level+isfb+alpha;
+			}
+			function switchRarity(rarity,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&r='+rarity+isfb+alpha;
+			}
+			function switchRace(race,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&race='+race+isfb+alpha;
+			}
+			function switchClass(theClass,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&class='+theClass+isfb+alpha;
+			}
+			function switchSet(set,crCollection){
+				var env = '/runes/manager.do?a=';
+				var isfb = gup("fb");
+				var alpha = gup("alpha");
+				if(alpha != ""){ alpha = "&alpha="+alpha; }
+				if(isfb != "" && isfb != 'null'){ isfb = "&fb=1"; }
+				window.location = env+crCollection+'&set='+set+isfb+alpha;
+			}
+			function switch24hours(){
+				$("#bgCollection").load('/runes/manager.do?a='+currCollection+'&last24=1');
+			}
+			function switchCurrentCollection(){
+				$("#bgCollection").load('/runes/manager.do?a='+currCollection);
+			}
+			function toggleCollection(setting){
+				if(setting == 'hide'){
+					$("#bgCollection").load('/runes/manager.do?a='+currCollection+'&cv=1');
+				}
+				else if(setting == 'show'){
+					$("#bgCollection").load('/runes/manager.do?a='+currCollection);
+				}
+			}
+			
+var timeout    = 500;
+var closetimer = 0;
+var ddmenuitem = 0;
+var ddie6fix = 0;
+
+function jsddm_open()
+{
+	jsddm_canceltimer();
+	jsddm_close();
+	ddmenuitem = $(this).find('ul').css('visibility', 'visible');
+	
+	if(pos = ddmenuitem.position())
+	{
+		ddie6fix = $('#ddie6fix').css({ 'display' : 'block', 'top' : pos.top, 'left' : pos.left, 'width' : ddmenuitem.width(), 'height' : ddmenuitem.height() });
+	}
+}
+
+function jsddm_close()
+{
+	if (ddmenuitem) ddmenuitem.css('visibility', 'hidden');
+	if (ddie6fix) ddie6fix.css('display', 'none');
+}
+
+function jsddm_timer()
+{  closetimer = window.setTimeout(jsddm_close, timeout);}
+
+function jsddm_canceltimer()
+{  if(closetimer)
+   {  window.clearTimeout(closetimer);
+      closetimer = null;}}
+
+document.onclick = jsddm_close;
+$(document).ready(function()
+{  
+
+	$("#eventsBox").hide();
+	
+	$('#jsddm > li').bind('mouseover', jsddm_open)
+    $('#jsddm > li').bind('mouseout',  jsddm_timer)
+    $('#jsddm_acct > li').bind('mouseover', jsddm_open)
+    $('#jsddm_acct > li').bind('mouseout',  jsddm_timer)});
+	
+			$(document).ready(function(){
+			
+		
+				
+		
+			
+				
+					
+				
+			
+				
+				$("#slider").easySlider({
+					prevText: '<img src="/_themes/global/market_left_arrow.gif" border="0">',
+					nextText: '<img src="/_themes/global/market_right_arrow.gif" border="0">'
+				});
+					
+				
+					
+				
+
+				
+					
+							getSplashSetting();
+							alertSetting();
+					
+				
+			});
+
+			$(function() {
+
+					
+
+					function runProfileWin(){
+						//get effect type from
+						var selectedEffect = "blind";
+
+						//most effect types need no options passed by default
+						var options = {};
+
+						//run the effect
+						$("#profile_win").toggle(selectedEffect,options,200);
+					}
+
+
+					$("#profile_bg").hover(function() {
+						runProfileWin();
+						return false;
+					});
+					$("#profile_win").blur(function() {
+						runProfileWin();
+						return false;
+					});
+
+					//run the currently selected effect
+					function runOSWin(){
+						//get effect type from
+						var selectedEffect = "blind";
+
+						//most effect types need no options passed by default
+						var options = {};
+
+						//run the effect
+						$("#os_win").toggle(selectedEffect,options,200);
+					}
+					//set effect from select menu value
+
+					$("#os_bg").click(function() {
+						runOSWin();
+						return false;
+					});
+
+					$("#btn_news_tab").click(function () {
+				      $("#newsBox").show();
+				      $("#eventsBox").hide();
+				    });
+
+					$("#btn_close_notice").click(function () {
+					      alertSetting('close');
+				    });
+
+					$("#btn_events_tab").click(function () {
+				      $("#eventsBox").show();
+				      $("#newsBox").hide();
+				    });
+
+						$("#dialog").dialog({
+						bgiframe: true,
+						modal: true,
+						buttons: {
+							Ok: function() {
+								$(this).dialog('close');
+							}
+						}
+					});
+			});
+
+			function getSplashSetting(){
+/* disablin splash screen
+				if ( Get_Cookie( 'splashPox' ) ){
+					// user has seen splash screen already, don't show it
+
+				}else{
+					Set_Cookie( 'splashPox', true, 60, '/', '', '' );
+					tb_show("SplashDetail","#TB_inline?height=515&width=675&inlineId=hiddenModalContent&modal=true");
+				}
+*/
+			}
+
+			function alertSetting(alertState){
+				if ( Get_Cookie( 'poxAlert' ) ){
+					$("#merge_notice").hide();
+				}else if(alertState == 'close'){
+					$("#merge_notice").hide();
+					Set_Cookie( 'poxAlert', true, 60, '/', '', '' );
+				}
+			}
+			function setTheme(themeId){
+				Set_Cookie( 'themeSetting', themeId, 60, '/', '', '' );
+			}
+
+            function poxLogout(){
+             Set_Cookie( 'fbes_', '', 0, '/','','');
+             window.location="/security/logout.do";
+            }
+
+			function toggleDropdown(divId,initialClass,nextClass){
+				if($(divId).hasClass(initialClass) == true){
+					$(divId).addClass(nextClass);
+					$(divId).removeClass(initialClass);
+				}
+				else {
+					$(divId).addClass(initialClass);
+					$(divId).removeClass(nextClass);
+				}
+			}
+
+			//set new cid or do nothing
+			function Set_Cookie( name, value, expires, path, domain, secure )
+			{
+				var today = new Date();
+				today.setTime( today.getTime() );
+					if ( expires )
+					{
+						expires = expires * 1000 * 60 * 60 * 24;
+					}
+				var expires_date = new Date( today.getTime() + (expires) );
+
+				document.cookie = name + "=" +escape( value ) +
+				( ( expires ) ? ";expires=" + expires_date.toGMTString() : "" ) +
+				( ( path ) ? ";path=" + path : "" ) +
+				( ( domain ) ? ";domain=" + domain : "" ) +
+				( ( secure ) ? ";secure" : "" );
+			}
+
+			function Get_Cookie( check_name ) {
+				var a_all_cookies = document.cookie.split( ';' );
+				var a_temp_cookie = '';
+				var cookie_name = '';
+				var cookie_value = '';
+				var b_cookie_found = false; // set boolean t/f default f
+
+				for ( i = 0; i < a_all_cookies.length; i++ )
+				{
+					// now we'll split apart each name=value pair
+					a_temp_cookie = a_all_cookies[i].split( '=' );
+
+
+					// and trim left/right whitespace while we're at it
+					cookie_name = a_temp_cookie[0].replace(/^\s+|\s+$/g, '');
+
+					// if the extracted name matches passed check_name
+					if ( cookie_name == check_name )
+					{
+						b_cookie_found = true;
+						// we need to handle case where cookie has no value but exists (no = sign, that is):
+						if ( a_temp_cookie.length > 1 )
+						{
+							cookie_value = unescape( a_temp_cookie[1].replace(/^\s+|\s+$/g, '') );
+						}
+						// note that in cases where cookie is initialized but no value, null is returned
+						return cookie_value;
+						break;
+					}
+					a_temp_cookie = null;
+					cookie_name = '';
+				}
+				if ( !b_cookie_found )
+				{
+					return null;
+				}
+			}
+
+			function gup( name )
+			{
+			  name = name.replace(/[\[]/,"\\\[").replace(/[\]]/,"\\\]");
+			  var regexS = "[\\?&]"+name+"=([^&#]*)";
+			  var regex = new RegExp( regexS );
+			  var results = regex.exec( window.location.href );
+			  if( results == null )
+			    return "";
+			  else
+			    return results[1];
+			}
+
+			 function sleep(delay)
+			 {
+			     var start = new Date().getTime();
+			     while (new Date().getTime() < start + delay);
+			 }
+
+				function gotoRegistration() {
+
+					var cidParam = gup( 'cid' );
+					var acParam = gup( 'ac' );
+					var param = "";
+					var cachedCid = Get_Cookie( 'cidPox' );
+
+					if(cidParam && acParam)
+					{
+						param="/register.do&cid=,"+cachedCid+"&ac="+acParam;
+					}
+					else if(cidParam){
+						param="/register.do&cid=,"+cachedCid+"&ac=";
+					}
+					else if(acParam){
+						if(Get_Cookie( 'cidPox' ) ){
+							param="/register.do&cid=,"+cachedCid+"&ac="+acParam;
+						}
+						else{
+							param="/register.do&cid=";
+						}
+					}
+					else{
+						if(Get_Cookie( 'cidPox' ) ){
+							param="/register.do&cid=,"+cachedCid+"&ac=";
+						}
+						else{
+							param="/register.do&cid=";
+						}
+					}
+					window.location = param;
+
+				}
+				</script>
+			
+		
+
+				
+			</head>
+
+			<body  >
+				
+			
+			<ul id="links"></ul>
+			<div class='container'>
+				
+					
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+
+
+
+
+                
+<div class='menu'>
+        <div class="theme_dd">
+            <div class="left" style="font:Bold 11px Arial; color:#74736c;padding:3px;width:42px;display:inline;">Theme:</div>
+            <div class="left" style="display:inline;position:absolute;top:4px;left:80px;"><a href="javascript:void(0);" id="theme_select" onClick="toggleDropdown('#theme_win','theme_expand','theme_collapse');"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/theme_dropdown.gif" border="0"></a></div>
+            <div id="theme_win" class="theme_collapse" style="z-index:351;">
+                <span style="padding-bottom:14px;top:10px;position:relative;display:block;">K'thir Forest</span>
+                <p><a href="javascript:void(0);" onclick="setTheme('generic');window.location.reload();">Pox Nora</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('forglar_swamp');window.location.reload();">Forglar Swamp</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('forsaken_wastes');window.location.reload();">Forsaken Wastes</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('ironfist_stronghold');window.location.reload();">Ironfist Stronghold</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('kthir_forest');window.location.reload();">K'thir Forest</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('kanen');window.location.reload();">Kanen</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('leoss');window.location.reload();">Leoss</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('savage_tundra');window.location.reload();">Savage Tundra</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('shattered_peaks');window.location.reload();">Shattered Peaks</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('stitched');window.location.reload();">Stitched</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('sundered_lands');window.location.reload();">Sundered Lands</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('tortuns');window.location.reload();">Tortuns</a></p>
+                <p><a href="javascript:void(0);" onclick="setTheme('the_underdepths');window.location.reload();">Underdepths</a></p>
+            <span style="position:absolute;top:0px;left:0px;display:block;"><a href="javascript:void(0);" id="theme_select" onClick="toggleDropdown('#theme_win','theme_expand','theme_collapse');"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/clear.gif" width="136" height="20" border="0"></a></span>
+                </div>
+        </div>
+        <br class="clear">
+        <div class="logo_home">
+            <a href="/"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/clear.gif" width="400" height="96" border="0"></a>
+        </div>
+        <br class="clear">
+        <div class="account_links">
+        
+        
+        <div class="myprofile_menu" style="width:400px;right:0px;">
+            <span class="right"><a href="javascript:void(0)" data-uv-lightbox="classic_widget" data-uv-mode="full" data-uv-primary-color="#5bb2d8" data-uv-link-color="#5bb2d8" data-uv-default-mode="support" data-uv-forum-id="238837">Help</a></span>
+            <ul id="jsddm_acct" style="float:right;">
+                <li><a href="/users/viewprofile.do">My Account</a>
+                    <ul style="margin: 10px 0 0 0px; padding: 10px 0; border: 1px solid #64bbdc;">
+                        <li><a href="/users/viewprofile.do">My Profile</a></li>
+                        <li><a href="/payment/choose-credits.do">Buy Credits</a></li>
+                        <li><a href="/guilds/home.do?service=guilds/home.do">My Guild</a></li>
+                        <li><a href="/account/showbuddylist.do?service=account/showbuddylist.do">My Buddies</a></li>
+                        <li><a href="/runes/manager.do?service=runes/manager.do">Rune Manager</a></li>
+                        <li><a href="/messenger/folders.do?service=messenger/folders.do">My Messages</a></li>
+                        <li><a href="/account/editpreferences.do?service=account/editpreferences.do">Game Preferences</a></li>
+                        <li><a href="/account/editpassword.do">Change Password</a></li>
+                        <li><a href="/account/editemail.do">Change E-mail</a></li>
+                    </ul>
+                </li>
+            </ul>
+            <span class="right" style="color:#74736c;font:normal 11px Arial;"> User: <span style="font:bold 10px Georgia;color:#fff;">NewsBuff</span> - <a href="/security/logout.do">Logout</a></span></span>
+        </div>
+        
+        </div>
+        <br class="clear">
+        
+        <div class='menu_items'>
+            <!--[if IE 6]><iframe id="ddie6fix" style="visibility: visible; display: none; position: absolute; margin-top: 17px; z-index: 100;" frameborder="0"></iframe><![endif]-->
+            <ul id="jsddm">
+                <li><a href="/">Home</a></li>
+                <li><a href="/info/features.do">Game Info</a>
+                    <ul style="position: absolute; z-index: 200;">
+                        <li><a href="/download.do">Download Game</a></li>
+                        <li><a href="/info/features.do">Overview</a></li>
+                        <li><a href="/factions/viewfactionprofile.do">Factions</a></li>
+                        <li><a href="/avatars/viewavatar.do">Avatars</a></li>
+                        <li><a href="/info/publicdecks.do">Public Decks</a></li>
+                        <li><a href="/info/gettingstarted.do">Getting Started</a></li>
+                        <li><a href="/info/story.do">The Pox Nora Story</a></li>
+                        
+                        
+                    </ul>
+                </li>
+                <li><a href="/info/media.do">Media</a>
+                    <ul style="position: absolute; z-index: 200;">
+                        <li><a href="/info/media.do#screenshots">Screenshots</a></li>
+                        <li><a href="/info/media.do#wallpaper">Wallpaper</a></li>
+                    </ul>
+                </li>
+                <li><a href="/store/index.do">Marketplace</a></li>
+                <li><a href="/runes/manager.do">Rune Management</a>
+                    <ul style="position: absolute; z-index: 200;">
+                        <li><a href="/runes/manager.do?service=runes/manager.do">Rune Manager</a></li>
+                        <li><a href="/trader/listtrades.do?service=trader/listtrades.do">Rune Trader</a></li>
+                        <li><a href="/runes/forge.do">Rune Forge</a></li>
+                        <li><a href="/runes/checklist.do">Rune Checklist</a></li>
+                    </ul>
+                </li>
+                <li><a href="/rankings/front.do?o=0&d=1">Rankings</a>
+                    <ul style="position: absolute; z-index: 200;">
+                        <li><a href="/rankings/front.do?o=0&d=1">Solo Leaderboard</a></li>
+                        <li><a href="/rankings/team.do?o=0&d=1">Team Leaderboard</a></li>
+                        <li><a href="/rankings/guilds.do">Guilds</a></li>
+                        <li><a href="/info/drumsofwar.do">Drums of War</a></li>
+                        <li><a href="/rankings/searchrankings.do">Search for Player</a></li>
+                    </ul>
+                </li>
+                <li><a href="http://forums.poxnora.com/">Forums</a></li>
+            </ul>
+        </div>
+    </div>
+    
+
+				
+
+				
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+	
+		
+		
+			<div class='feature_flash'>&nbsp;
+                <object classid="clsid:d27cdb6e-ae6d-11cf-96b8-444553540000" codebase="http://download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=9,0,0,0" width="963" height="282" id="poxnora_feature_rotator" align="middle">
+                    <param name="allowScriptAccess" value="sameDomain" />
+                    <param name="allowFullScreen" value="false" />
+                    <param name="movie" value="/_themes/kthir_forest/flash/poxnora_feature_rotator.swf?xmlPath=/features.do" />
+                    <param name="wmode" value="transparent" />
+                    <param name="quality" value="high" />
+                    <param name="bgcolor" value="#000000" />
+                    <embed src="/_themes/kthir_forest/flash/poxnora_feature_rotator.swf?xmlPath=/features.do" quality="high" bgcolor="#000000" width="963" height="282" name="poxnora_feature_rotator" wmode="transparent" align="middle" allowScriptAccess="sameDomain" allowFullScreen="false" type="application/x-shockwave-flash" pluginspage="http://www.adobe.com/go/getflashplayer" />
+                </object>
+
+            </div>
+			<div class='main_top'></div>
+			<div class='main_body'>
+				<div class='left_shoulder'>
+					<img src="https://d2aao99y1mip6n.cloudfront.net/_themes/kthir_forest/topcap_left.gif" style='display:block;'>
+				</div>
+				<div class='right_shoulder'>
+					<img src="https://d2aao99y1mip6n.cloudfront.net/_themes/kthir_forest/topcap_right.gif" style='display:block;'>
+				</div>
+		
+	
+
+			
+
+                
+
+				
+<script type="text/javascript" src="https://d2aao99y1mip6n.cloudfront.net/js/jquery.simplemodal.1.4.4.min.js"></script>
+<script>
+playFrame = new Array()
+playFrame[0] = new Image()
+playFrame[0].src = "https://d2aao99y1mip6n.cloudfront.net/_themes/global/play_button_off.jpg";
+playFrame[1] = new Image()
+playFrame[1].src = "https://d2aao99y1mip6n.cloudfront.net/_themes/global/play_button_on.jpg";
+</script>
+
+
+        <div class="left_nav" style="overflow:visible;">
+              
+                
+                
+                
+                
+                
+                <a href="/download.do">
+                    <img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/play_button_off.jpg"  onMouseOver="this.src=playFrame[1].src;" onMouseOut="this.src=playFrame[0].src;" id="playImg" style="margin-left:-10px" border="0">
+                </a>
+                <br>
+        <div style="position:relative;margin-top:20px;">
+        <span style="position:absolute; top:3px; left:50px; font: bold italic 18px Georgia, Times New Roman, Times, serif; color:#f8f6ea;">Follow Pox Nora</span>
+        <img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/poxontheweb_callout.jpg" width="255" height="119" border="0" usemap="#ontheweb">
+                <map name="ontheweb">
+                    <area shape="rect" coords="9,50,61,102" href="http://twitter.com/poxnora" target="_new"/>
+  <area shape="rect" coords="69,48,125,104" href="https://www.facebook.com/pages/PoxNora/190961210965486"  target="_new"/>
+  <area shape="rect" coords="135,50,187,104" href="http://www.youtube.com/poxnora"  target="_new"/>
+  <area shape="rect" coords="193,48,249,108" href="http://gplus.to/PoxNora"  target="_new"/>
+                </map>
+                </div>
+                <div class="top10players">
+                    <div class="top10_title">Top 10 Players</div>
+                    <span class="top10-viewall"><a href="/rankings/front.do">View All</a></span>
+                    <div class="top10items">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">1&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster3.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=ballballer" style="color: rgb(0, 75, 255);">ballballer </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">2&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=MogaBait" style="color: rgb(75, 150, 255);">MogaBait </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">3&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=ShrineMaster" style="color: rgb(75, 150, 255);">ShrineMaster </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">4&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=Hermaios" style="color: rgb(75, 150, 255);">Hermaios </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">5&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=guitarape" style="color: rgb(75, 150, 255);">guitarape </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">6&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=Nepallyon" style="color: rgb(75, 150, 255);">Nepallyon </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">7&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=davre" style="color: rgb(75, 150, 255);">davre </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">8&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=Elf4ntGun" style="color: rgb(75, 150, 255);">Elf4ntGun </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">9&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=APriest11" style="color: rgb(75, 150, 255);">APriest11 </a> </div>
+                                <br class="clear">
+                            
+                            
+								<div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">10&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/solo_battlemaster2.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=DragonSlayer1" style="color: rgb(150, 200, 255);">DragonSlayer1 </a> </div>
+                                <br class="clear">
+                            
+                            
+                    </div>
+                </div>
+
+                <div class="top10players">
+                    <div class="top10_title">Top 10 Team Players</div>
+                    <span class="top10-viewall"><a href="/rankings/team.do">View All</a></span>
+                    <div class="top10items">
+                            
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">1&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_battlemaster1.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=zeya231" style="color: rgb(190, 140, 200);">zeya231 </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">2&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_battlemaster1.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=catstrofe" style="color: rgb(190, 140, 200);">catstrofe </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">3&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_battlemaster1.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=Papadragon" style="color: rgb(190, 140, 200);">Papadragon </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">4&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_legendary.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=ultm8death" style="color: rgb(255, 255, 255);">ultm8death </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">5&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_limited.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=nepyonisdead" style="color: rgb(255, 255, 255);">nepyonisdead </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">6&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_exotic.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=sonmbra" style="color: rgb(255, 255, 255);">sonmbra </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">7&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_rare.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=EsTraTeG1c" style="color: rgb(255, 255, 255);">EsTraTeG1c </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">8&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_rare.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=loplop123" style="color: rgb(255, 255, 255);">loplop123 </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">9&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_rare.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=vampiro85" style="color: rgb(255, 255, 255);">vampiro85 </a> </div>
+									<br class="clear">
+                                
+                            
+                                    <div class="top10entry left" style="color:#ffffff;width:200px;text-align:left;margin-left:10px;margin-right:3px;font-size:11px;">10&nbsp;&nbsp; <img src="https://d2aao99y1mip6n.cloudfront.net/images/leagues/team_exotic.png"/>&nbsp;&nbsp; <a href="/users/viewprofile.do?u=PunishA1" style="color: rgb(255, 255, 255);">PunishA1 </a> </div>
+									<br class="clear">
+                                
+                            
+                    </div>
+                </div>
+
+                <div class="top10guilds">
+                    <div class="top10_title">Top 10 Guilds</div>
+                    <span class="top10-viewall"><a href="/rankings/guilds.do">View All</a></span>
+                    <div class="top10items">
+                            
+                            
+                    </div>
+                </div>
+        </div>
+        <div class='main_content'>
+            
+                <div class="latest_update">
+                    <p style="margin-bottom:10px;">Latest Update</p>
+                    <a href="/store/index.do?filter=Packs"><img src="https://d2aao99y1mip6n.cloudfront.net/images/_latestupdates/LatestUpdate.jpg" border="0"></a><br><a href="/store/index.do?filter=Packs"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/latest_update_more.gif" style="position:relative;top:-18px;" border="0"></a>
+                </div>
+                <div class="market_place">
+                    <p style="margin-bottom:10px;">Marketplace</p>
+                        <div style="position:relative;">
+                        <div id="slider">
+                            <ul>
+                                <li><a href="/store/index.do"><img src="https://d2aao99y1mip6n.cloudfront.net/images/_marketplace/marketplace_rotator.jpg" border="0"></a></li>
+                                <li><a href="/store/index.do"><img src="https://d2aao99y1mip6n.cloudfront.net/images/_marketplace/marketplace_rotator_extended_set.jpg" border="0"></a></li>
+                                <li><a href="/store/index.do"><img src="https://d2aao99y1mip6n.cloudfront.net/images/_marketplace/marketplace_rotator_core_set.jpg" border="0"></a></li>
+                            </ul>
+                        </div>
+                    </div>
+    <div class="absolute" style="top:263px;left:30px;"><a href="/store/index.do"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/marketplace_more.gif" class="left" border="0"></a><a href="/store/index.do"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/marketplace_store.gif" class="left" border="0"></a></div>
+                </div>
+            <br class="clear">
+
+        <div id="newsBox">
+            <div class="tab_active left"><span style="top:8px;position:relative;">News</span></div><div class="left">&nbsp;</div><div class="tab_inactive left" style="position:relative;"><a href="#" id="btn_events_tab" onClick="return false"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/clear.gif" style="position:absolute;width:166px;height:43px;top:0px;left:0px;z-index:200;" border="0"></a><span style="top:8px;position:relative;">Events</span></div>
+            <br class="clear">
+            <div class="news_block">
+                                    
+                                
+                                
+                                    
+                                    
+                                                <div class="news_entry left"><p class="headline"><a href="/news/current.do?id=1071">Plox Neon Now Available</a></p><p class="newsmeta">by Senshu @ Fri Dec 22 16:15:29 UTC 2017</p>
+                                                
+                                                    
+
+                                                    
+                                                        
+                                                        <p class="newssummary">
+                                                        <p>Plox Neon, the new action-puzzle experience from Desert Owl Games is now available on Steam, Android, and iOS.</p><p><img src="https://d2wyctv03a17c5.cloudfront.net/PloxNeonNews.png" /></p><p>For more info please see the <a href="http://forums.poxnora.com/index.php?threads/plox-neon-now-available.29538/">official announcement post</a> or look for it on the  <a href="http://store.steampowered.com/app/751970/Plox_Neon/">Steam</a>,  <a href="https://play.google.com/store/apps/details?id=com.desertowlgames.ploxneonfull">Google Play</a>,  <a href="https://itunes.apple.com/us/app/PLOXNEON/id1302431911?mt=...<br/></p>
+                                                        <p><a href="/news/current.do?id=1071">Read More</a></p></p></div>
+                                                        <br class="clear">
+                                                    
+                                                
+                                    
+                                    
+                                                <div class="news_entry left"><p class="headline"><a href="/news/current.do?id=1070">Pox Nora Holiday 2017 Sale!</a></p><p class="newsmeta">by Senshu @ Fri Dec 15 22:03:24 UTC 2017</p>
+                                                
+                                                    
+
+                                                    
+                                                        
+                                                        <p class="newssummary">
+                                                        <p>The weather is becoming frightful but the lovable Krampus finds it so delightful with his frigid campaign.  To help close out 2017 Holiday Packs are now available on the Pox Nora Marketplace! </p><p>More information is available on the <a href="http://forums.poxnora.com/index.php?threads/pox-nora-holiday-2017-sale.29503/">Forums</a>.</p><p><img src="https://d2wyctv03a17c5.cloudfront.net/holiday_GaruSmall.jpg" />...<br/></p>
+                                                        <p><a href="/news/current.do?id=1070">Read More</a></p></p></div>
+                                                        <br class="clear">
+                                                    
+                                                
+                                    
+                                    
+                                                <div class="news_entry left"><p class="headline"><a href="/news/current.do?id=1069">Space Wars Now Available</a></p><p class="newsmeta">by Senshu @ Fri Dec 08 18:15:27 UTC 2017</p>
+                                                
+                                                    
+
+                                                    
+                                                        
+                                                        <p class="newssummary">
+                                                        <p>Space Wars: Interstellar Empires launches today!</p><p><iframe width="500" height="281" src="https://www.youtube.com/embed/-m7dIHKoLjc" frameborder="0" gesture="media" allow="encrypted-media" allowfullscreen></iframe></p><p>You can download Space Wars: Interstellar Empires from the <a href="http://store.steampowered.com/app/574070/Space_Wars_Interstellar_Empires/">Steam Store</a>, play for free and join the conversation on the <a href="http://forums.spacewars.com/">Space Wars forums</a>....<br/></p>
+                                                        <p><a href="/news/current.do?id=1069">Read More</a></p></p></div>
+                                                        <br class="clear">
+                                                    
+                                                
+                                    
+                                    
+                                
+                            
+
+            </div>
+
+        </div>
+
+        <div id="eventsBox" >
+            <div class="tab_inactive left" style="position:relative;"><a href="#" id="btn_news_tab" onClick="return false"><img src="/_themes/global/clear.gif" style="position:absolute;width:166px;height:43px;top:0px;left:0px;z-index:200;" border="0"></a><span style="top:8px;position:relative;">News</span></div>
+            <div class="left">&nbsp;</div><div class="tab_active left"><span style="top:8px;position:relative;">Events</span></div>
+            <br class="clear">
+
+            <div class="news_block">
+
+                                    
+                                
+                                                <div class="news_entry left"><p class="headline">There are no upcoming events to report.</p></div>
+                                                <br class="clear">
+                                
+                                
+                            
+            </div>
+        </div>
+
+
+			
+			
+				
+
+
+
+
+
+
+
+
+
+	
+		
+		
+				</div>
+			<br class="clear">
+			<div style="height:252px;"></div>
+			<br class="clear">
+			</div>
+			<div class='main_bot'>
+				<div style="position:absolute;top:-190px;left:360px;">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+    
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+
+	<div class="phat_footer">
+	
+		<div class="left"><h2>Game Info</h2><br/>
+			<a href="/info/features.do">Overview</a><br>
+			<a href="/info/media.do">Media</a><br>
+			<a href="/factions/viewfactionprofile.do">Factions</a><br>
+			<a href="/avatars/viewavatar.do">Avatars</a><br>
+			<a href="/info/gettingstarted.do?i=1">Getting Started</a><br>
+			<a href="/info/story.do">The Pox Nora Story</a><br>
+			<a href="/info/listfaqs.do">FAQs</a><br>
+		</div>
+		
+		<div class="left">
+			<img src="/_themes/global/footer_divider.gif" width="2" height="195">
+		</div>
+						
+		<div class="left"><h2>Community</h2><br/>
+			<a href="http://forums.poxnora.com/">Forums</a><br>
+			<a href="/rankings/front.do">Leaderboard</a><br>
+			<a href="/rankings/guilds.do">Guild Rankings</a><br>
+			<a href="/info/drumsofwar.do">Drums of War</a>
+		</div>
+		
+		<div class="left">
+			<img src="/_themes/global/footer_divider.gif" width="2" height="195">
+		</div>
+
+		<div class="left"><h2>Marketplace</h2><br/>
+			<a href="/store/index.do">Buy Packs</a><br>
+			<a href="/store/index.do">Avatars</a><br>
+			<a href="/store/index.do">Campaigns</a><br>
+		</div>
+		
+		<div class="left">
+			<img src="/_themes/global/footer_divider.gif" width="2" height="195">
+		</div>
+		
+		<div class="left"><h2>My Account</h2><br/>
+			<a href="/users/viewprofile.do?u=NewsBuff">My Profile</a><br>
+			
+			<a href="/account/showbuddylist.do?service=account/showbuddylist.do">My Buddies</a><br>
+			
+			<a href="/messenger/folders.do?service=messenger/folders.do">My Messages</a><br>
+			<a href="/account/editpreferences.do?service=account/editpreferences.do">Game Preferences</a><br>
+            <a href="/account/editpassword.do">Change Password</a><br>
+            <a href="/account/editemail.do">Change E-mail</a><br>
+            <a href="javascript:void(0)" data-uv-lightbox="classic_widget" data-uv-mode="full" data-uv-primary-color="#5bb2d8" data-uv-link-color="#5bb2d8" data-uv-default-mode="support" data-uv-forum-id="238837">Help</a>
+		</div>
+		
+		
+	
+	</div>
+		</div>
+			</div>
+		
+	
+
+	<div class='footer'></div>
+	
+	<div class='legal'>
+		<a href="/info/refund.do">Refund Policy</a> &nbsp; | &nbsp; <a href="/info/privacy.do">Privacy Policy</a> &nbsp; | &nbsp; <a href="/info/terms.do">Terms of Service</a> &nbsp; | &nbsp; <a href="/info/codeofconduct.do">Code of Conduct</a>
+	</div>
+
+	<div style="padding: 10px 0 40px 0;">
+		<img src="https://d2aao99y1mip6n.cloudfront.net/images/poxnora_esrb.jpg" style="margin: 0 auto;"/>
+	</div>
+				</div>
+			
+
+            <script type="text/javascript">
+                var _gaq = _gaq || [];
+                _gaq.push(['_setAccount', 'UA-48163720-1']);
+                _gaq.push(['_trackPageview']);
+
+                (function() {
+                    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+                    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+                })();
+            </script>
+
+            
+	            <!-- UserVoice JavaScript SDK (only needed once on a page) -->
+	            <script>(function(){var uv=document.createElement('script');uv.type='text/javascript';uv.async=true;uv.src='//widget.uservoice.com/CFgjZs7MxX8EQoGBgZWTeA.js';var s=document.getElementsByTagName('script')[0];s.parentNode.insertBefore(uv,s)})()</script>
+
+	            <!-- A tab to launch the Classic Widget -->
+	            <script>
+	                UserVoice = window.UserVoice || [];
+	                UserVoice.push(['showTab', 'classic_widget', {
+	                    mode: 'full',
+	                    primary_color: '#5bb2d8',
+	                    link_color: '#5bb2d8',
+	                    default_mode: 'support',
+	                    forum_id: 238837,
+	                    tab_label: 'Feedback & Support',
+	                    tab_color: '#5bb2d8',
+	                    tab_position: 'middle-left',
+	                    tab_inverted: false
+	                }]);
+	            </script>
+	        
+
+	        <div id="confirm-modal">
+	        	<div style="padding-top: 30px;">
+		        	<a href="javascript:void(0);" class="simplemodal-close" id="close-btn"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/btn_closewindow.gif" border="0"/></a>
+		        	<h1>Confirm</h1>
+		        	<p class="confirm-message"></p>
+		        	<a href="#" class="simplemodal-close fancy-btn"><span>No</span></a>
+		        	<a href="#" class="yes fancy-btn"><span>Yes</span></a>
+		        </div>
+	        </div>
+            <div id="okay-modal">
+	        	<div style="padding-top: 30px;">
+		        	<a href="javascript:void(0);" class="simplemodal-close" id="close-btn"><img src="https://d2aao99y1mip6n.cloudfront.net/_themes/global/btn_closewindow.gif" border="0"/></a>
+		        	<h1>Okay</h1>
+		        	<p class="okay-message"></p>
+		        	<a href="#" class="simplemodal-close fancy-btn"><span>Okay</span></a>
+		        </div>
+	        </div>
+			</body>
+		</html>
